@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M & L</title>
+    <link rel="stylesheet" href="style.css"> 
+    <style>
+        /* CSS para o banner rotativo */
+        #banner {
+            display: flex;
+            justify-content: center; /* Centraliza horizontalmente */
+            align-items: center; /* Centraliza verticalmente */
+            height: 700px; /* Ajuste a altura conforme necessário */
+            overflow: hidden; /* Oculta o conteúdo que sai da área do banner */
+            position: relative;
+        }
+
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease;
+            width: 100%; /* Ajuste de acordo com o número de imagens */
+        }
+
+        .carousel-item img {
+            width: 100%; /* Imagem ocupa 100% do espaço do item */
+            height: 100%; /* Mantém a proporção da imagem */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div>
+                <br><h1 class="JFK"><strong>Milena & Luiz </strong></h1></br>
+            </div>  
+            <ul>
+                <li><a href="#" target="_blank">História </a></li>
+                <li><a href="#" target="_blank">2021 </a></li>
+                <li><a href="#" target="_blank">2022</a></li>
+                <li><a href ="#"target="_blank">2023</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="banner">
+        <div class="carousel">
+            <div class="carousel-item active">
+                <img src="img/img2.png" alt="Banner 2">
+            </div>
+        </div>
+    </section>
+
+    <!-- Grid de Pacotes Turísticos -->
+    <section id="pacotes">
+        <h1 class="pct"><strong>Estamos juntos desde 19/02/2022.</strong></h1>   
+       
+        <div>
+            <br><h4 class="time" id="contador"><strong></strong></h4></br>
+        </div>  
+
+        <script>
+            function atualizarTempo() {
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("contador").innerHTML = this.responseText;
+                    }
+                };
+                xmlhttp.open("GET", "tempo.php", true);
+                xmlhttp.send();
+            }
+        
+            // Atualizar o tempo a cada segundo (1000 milissegundos)
+            setInterval(atualizarTempo, 1000);
+        </script>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 M&L  </p>
+    </footer>
+</body>
+</html>
