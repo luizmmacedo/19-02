@@ -38,7 +38,7 @@
                 <li><a href="#" target="_blank">História </a></li>
                 <li><a href="#" target="_blank">2021 </a></li>
                 <li><a href="#" target="_blank">2022</a></li>
-                <li><a href ="#"target="_blank">2023</a></li>
+                <li><a href="#" target="_blank">2023</a></li>
             </ul>
         </nav>
     </header>
@@ -54,31 +54,58 @@
     <!-- Grid de Pacotes Turísticos -->
     <section id="pacotes">
         <h1 class="pct"><strong>Estamos juntos desde 19/02/2022.</strong></h1>   
-       
+
         <div>
             <br><h4 class="time" id="contador"><strong></strong></h4></br>
         </div>  
 
         <script>
-            function atualizarTempo() {
-                var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        document.getElementById("contador").innerHTML = this.responseText;
-                    }
-                };
-                xmlhttp.open("GET", "tempo.php", true);
-                xmlhttp.send();
+            function calcularTempo() {
+                // Definindo a data de início
+                const dataInicio = new Date("2022-02-19T00:00:00");
+                const dataAtual = new Date();
+
+                // Calculando a diferença
+                const diff = dataAtual - dataInicio;
+
+                // Convertendo a diferença em anos, meses, dias, horas, minutos e segundos
+                const anos = new Date(diff).getUTCFullYear() - 1970;
+                const meses = new Date(diff).getUTCMonth();
+                const dias = new Date(diff).getUTCDate() - 1; // Para ajustar os dias
+                const horas = dataAtual.getHours();
+                const minutos = dataAtual.getMinutes();
+                const segundos = dataAtual.getSeconds();
+
+                // Encontrar a próxima ocorrência do dia 19 do mês atual ou do próximo mês
+                const proximaData = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 19);
+                if (dataAtual.getDate() > 19) {
+                    proximaData.setMonth(proximaData.getMonth() + 1);
+                }
+
+                // Cálculo da diferença até a próxima data
+                const diffProxima = proximaData - dataAtual;
+
+                const diasProxima = Math.floor(diffProxima / (1000 * 60 * 60 * 24));
+                const horasProxima = new Date(diffProxima).getUTCHours();
+                const minutosProxima = new Date(diffProxima).getUTCMinutes();
+                const segundosProxima = new Date(diffProxima).getUTCSeconds();
+
+                // Exibindo os resultados
+                document.getElementById("contador").innerHTML = `
+                    Estamos juntos há ${anos} anos, ${meses} meses, ${dias} dias, ${horas} horas, ${minutos} minutos, ${segundos} segundos.<br><br>
+                    Vamos comemorar o próximo dia 19 em: ${diasProxima} dias, ${horasProxima} horas, ${minutosProxima} minutos, ${segundosProxima} segundos.
+                `;
             }
-        
-            // Atualizar o tempo a cada segundo (1000 milissegundos)
-            setInterval(atualizarTempo, 1000);
+
+            // Atualizar o tempo a cada segundo
+            setInterval(calcularTempo, 1000);
+            calcularTempo(); // Chamar uma vez ao carregar
         </script>
     </section>
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2024 M&L  </p>
+        <p>&copy; 2024 M&L</p>
     </footer>
 </body>
 </html>
