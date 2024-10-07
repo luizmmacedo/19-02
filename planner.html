@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner </title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0; /* Removido margin */
+            background-color: #f0f8ff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centraliza o conteúdo horizontalmente */
+        }
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+            margin-top: 20px; /* Espaçamento superior */
+        }
+        .calendar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Mantido para centralizar */
+            width: 100%; /* Garantindo que o contêiner ocupe a largura total */
+            max-width: 900px; /* Largura máxima para evitar que fique muito largo em telas grandes */
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .day {
+            background-color: #fff;
+            border: 2px solid #4a90e2;
+            border-radius: 10px;
+            padding: 30px;
+            position: relative;
+            min-height: 150px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+            width: 120px;
+        }
+        .day:hover {
+            background-color: #e6f7ff;
+        }
+        .day-header {
+            font-weight: bold;
+            text-align: center;
+            color: #4a90e2;
+        }
+        .event {
+            margin: 1px 0;
+            padding: 1px;
+            border-radius: 1px;
+            color: white;
+            display: flex;
+            flex-direction: column; /* Alterado para coluna */
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 14px;
+        }
+        .remove-btn, .edit-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 5px; /* Margem superior para espaçamento */
+            border-radius: 3px;
+            padding: 3px 5px;
+        }
+        .edit-btn {
+            background: #4a90e2; /* Cor do botão de edição */
+        }
+        #addEventForm {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #eventName, #eventDate, #eventColor {
+            margin: 5px;
+            padding: 10px;
+            width: 220px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #monthYear {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 5px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 1px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #357abd;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Meu Planner Interativo</h1>
+    
+    <div class="calendar-container">
+        <div id="monthYear">
+            <button onclick="changeMonth(-1)">&#8249;</button>
+            <h2 id="monthDisplay"></h2>
+            <button onclick="changeMonth(1)">&#8250;</button>
+        </div>
+        <div class="calendar" id="calendar"></div>
+
+        <div id="addEventForm">
+            <input type="text" id="eventName" placeholder="Nome do Evento" />
+            <input type="date" id="eventDate" />
+            <select id="eventColor">
+                <option value="#76c7c0">Turquesa</option>
+                <option value="#ff6b6b">Vermelho</option>
+                <option value="#f7d060">Amarelo</option>
+                <option value="#4a90e2">Azul</option>
+                <option value="#7ed321">Verde</option>
+            </select>
+            <button onclick="addEvent()">Adicionar Evento</button>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+
+        function createCalendar() {
+            const calendar = document.getElementById('calendar');
+            const monthDisplay = document.getElementById('monthDisplay');
+            calendar.innerHTML = '';
+            
+            const month = currentDate.getMonth();
+            const year = currentDate.getFullYear();
+            monthDisplay.innerText = capitalizeFirstLetter(currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }));
+
+            // Dias da semana
+            const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            daysOfWeek.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'day-header';
+                header.innerText = day;
+                calendar.appendChild(header);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Preencher os dias vazios antes do primeiro dia do mês
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement('div');
+                calendar.appendChild(emptyDiv);
+            }
+
+            // Preencher os dias do mês
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                dayDiv.id = `day-${i}`;
+                dayDiv.innerHTML = `<strong>${i}</strong>`;
+                calendar.appendChild(dayDiv);
+            }
+
+            loadEvents();
+        }
+
+        function loadEvents() {
+            const events = JSON.parse(localStorage.getItem('events')) || [];
+            events.forEach(event => {
+                const dayDiv = document.getElementById(`day-${event.date}`);
+                if (dayDiv && event.month === currentDate.getMonth() && event.year === currentDate.getFullYear()) {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = 'event';
+                    eventDiv.style.backgroundColor = event.color;
+                    eventDiv.innerText = event.name;
+
+                    const editBtn = document.createElement('button');
+                    editBtn.innerText = 'Editar';
+                    editBtn.className = 'edit-btn'; // Classe para estilização
+                    editBtn.onclick = () => editEvent(eventDiv, event);
+                    eventDiv.appendChild(editBtn);
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.innerText = 'Excluir';
+                    removeBtn.onclick = () => removeEvent(eventDiv, event);
+                    eventDiv.appendChild(removeBtn);
+
+                    dayDiv.appendChild(eventDiv);
+                }
+            });
+        }
+
+        function addEvent() {
+            const eventName = document.getElementById('eventName').value;
+            const eventDate = new Date(document.getElementById('eventDate').value);
+            const eventColor = document.getElementById('eventColor').value;
+
+            if (!eventName || isNaN(eventDate)) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            const events = JSON.parse(localStorage.getItem('events')) || [];
+            const newEvent = {
+                name: eventName,
+                date: eventDate.getDate(),
+                month: eventDate.getMonth(),
+                year: eventDate.getFullYear(),
+                color: eventColor,
+            };
+
+            events.push(newEvent);
+            localStorage.setItem('events', JSON.stringify(events));
+
+            const dayDiv = document.getElementById(`day-${eventDate.getDate()}`);
+            addEventToDay(dayDiv, newEvent);
+            clearForm();
+        }
+
+        function addEventToDay(dayDiv, event) {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            eventDiv.style.backgroundColor = event.color;
+            eventDiv.innerText = event.name;
+
+            const editBtn = document.createElement('button');
+            editBtn.innerText = 'Editar';
+            editBtn.className = 'edit-btn'; // Classe para estilização
+            editBtn.onclick = () => editEvent(eventDiv, event);
+            eventDiv.appendChild(editBtn);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerText = 'Excluir';
+            removeBtn.onclick = () => removeEvent(eventDiv, event);
+            eventDiv.appendChild(removeBtn);
+
+            dayDiv.appendChild(eventDiv);
+        }
+
+        function removeEvent(eventDiv, event) {
+            const events = JSON.parse(localStorage.getItem('events')) || [];
+            const updatedEvents = events.filter(e => 
+                !(e.date === event.date && e.month === event.month && e.year === event.year)
+            );
+            localStorage.setItem('events', JSON.stringify(updatedEvents));
+            eventDiv.parentElement.removeChild(eventDiv);
+        }
+
+        function editEvent(eventDiv, event) {
+            const newEventName = prompt("Edite o nome do evento:", event.name);
+            if (newEventName) {
+                const events = JSON.parse(localStorage.getItem('events')) || [];
+                const updatedEvents = events.map(e => {
+                    if (e.date === event.date && e.month === event.month && e.year === event.year) {
+                        return { ...e, name: newEventName };
+                    }
+                    return e;
+                });
+                localStorage.setItem('events', JSON.stringify(updatedEvents));
+                eventDiv.childNodes[0].nodeValue = newEventName;
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('eventName').value = '';
+            document.getElementById('eventDate').value = '';
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            createCalendar();
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        createCalendar();
+    </script>
+
+</body>
+</html>
